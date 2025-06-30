@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 MODEL_PATH = "model-tr"
-MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-tr-0.22.zip"
+MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-tr-0.4.zip"
 
 app = Flask(__name__)
 CORS(app)
