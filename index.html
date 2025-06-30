@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ses/Vİdeo Transkript - Türkçe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f6f8fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 420px;
+            margin: auto;
+            background: #fff;
+            padding: 2rem 2rem 1.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            margin-top: 5vh;
+        }
+        h1 {
+            text-align: center;
+            color: #22223b;
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.7rem;
+            color: #4a4e69;
+            font-weight: 500;
+        }
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 1.2rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background: #22223b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #4a4e69;
+        }
+        .result {
+            margin-top: 1.5rem;
+            background: #f2e9e4;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 60px;
+            color: #22223b;
+            font-size: 1.05rem;
+            white-space: pre-line;
+        }
+        .loading {
+            text-align: center;
+            color: #9a8c98;
+            margin-top: 1rem;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+                margin-top: 2vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Türkçe Transkript</h1>
+        <form id="uploadForm">
+            <label for="file">Ses veya Video Dosyası Yükle</label>
+            <input type="file" id="file" name="file" accept="audio/*,video/*" required>
+            <button type="submit">Transkript Çıkar</button>
+        </form>
+        <div class="loading" id="loading" style="display:none;">İşleniyor, lütfen bekleyin...</div>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        const form = document.getElementById('uploadForm');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            resultDiv.textContent = '';
+            loadingDiv.style.display = 'block';
+            const fileInput = document.getElementById('file');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            try {
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.text) {
+                    resultDiv.textContent = data.text;
+                } else if (data.error) {
+                    resultDiv.textContent = 'Hata: ' + data.error;
+                } else {
+                    resultDiv.textContent = 'Bir hata oluştu.';
+                }
+            } catch (err) {
+                resultDiv.textContent = 'Sunucuya ulaşılamıyor veya hata oluştu.';
+            }
+            loadingDiv.style.display = 'none';
+        });
+    </script>
+</body>
+</html> 
