@@ -1,5 +1,4 @@
 import os
-import urllib.request
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from vosk import Model, KaldiRecognizer
@@ -8,28 +7,15 @@ import subprocess
 import tempfile
 
 MODEL_PATH = "model-tr"
-MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-tr-0.4.zip"
 
 app = Flask(__name__)
 CORS(app)
 
-# Modeli indir ve çıkar
+# Model klasörü kontrolü
 if not os.path.exists(MODEL_PATH):
-    import zipfile
-    print("Türkçe modeli indiriliyor...")
-    zip_path = "model-tr.zip"
-    urllib.request.urlretrieve(MODEL_URL, zip_path)
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(".")
-    # Model klasörü ismini düzelt
-    for d in os.listdir('.'):
-        if d.startswith('vosk-model-small-tr'):
-            os.rename(d, MODEL_PATH)
-    os.remove(zip_path)
+    raise RuntimeError("model-tr klasörü bulunamadı! Lütfen Türkçe Vosk modelini indirip bu klasöre koyun.")
 
 model = Model(MODEL_PATH)
-
-# Ses dosyasını wav'a çevir
 
 def convert_to_wav(input_path):
     output_path = tempfile.mktemp(suffix='.wav')
@@ -48,7 +34,6 @@ def transcribe():
     with tempfile.NamedTemporaryFile(delete=False) as temp:
         file.save(temp.name)
         temp_path = temp.name
-    # wav'a çevir
     wav_path = convert_to_wav(temp_path)
     wf = wave.open(wav_path, "rb")
     if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getframerate() != 16000:
@@ -76,7 +61,6 @@ def transcribe():
                 text += res['text'] + ' '
     except Exception:
         text = result
-    # Temizlik
     wf.close()
     os.remove(temp_path)
     os.remove(wav_path)
